@@ -28,7 +28,7 @@ void addMemberToRoom(Room *room, int fd) {
 }
 
 void removeMemberFromRoom(Room *room, int memberIdx) {
-  if (memberIdx < room->members_count) {
+  if (memberIdx >= room->members_count) {
     return;
   }
   room->pfds[memberIdx] = room->pfds[room->members_count - 1];
