@@ -49,3 +49,39 @@ int getListenerSocket(char *port, int backlog) {
 
   return sock_fd;
 }
+
+int getConnectionSocket(char *port, char *host) {
+  int sock_fd, status;
+  struct addrinfo hints, *res, *p;
+
+  memset(&hints, 0, sizeof(hints));
+  hints.ai_family = AF_UNSPEC;
+  hints.ai_socktype = SOCK_STREAM;
+
+  if ((status = getaddrinfo(host, port, &hints, &res)) != 0) {
+    fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(status));
+    exit(1);
+  }
+
+  for(p = res; p != NULL; p = p->ai_next) {
+    if ((sock_fd = socket(p->ai_family, p->ai_socktype, p->ai_protocol)) == -1) {
+      perror("client socket");
+      continue;
+    }
+    if (connect(sock_fd, p->ai_addr, p->ai_addrlen) == -1) {
+      perror("client connect");
+      close(sock_fd);
+      continue;
+    }
+
+    break;
+  }
+
+  if (p == NULL) {
+    return -1;
+  }
+
+  freeaddrinfo(res);
+
+  return sock_fd;
+}
